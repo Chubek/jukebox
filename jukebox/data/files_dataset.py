@@ -6,6 +6,7 @@ from torch.utils.data import Dataset
 from jukebox.utils.dist_utils import print_all
 from jukebox.utils.io import get_duration_sec, load_audio
 from jukebox.data.labels import Labeller
+from mutagen.id3 import ID3
 
 class FilesAudioDataset(Dataset):
     def __init__(self, hps):
@@ -75,7 +76,9 @@ class FilesAudioDataset(Dataset):
             example, ("unknown", "classical", "") could be a metadata for a
             piano piece.
         """
-        return None, None, None
+        tags = ID3(filename)
+        
+        return tags['TPE1'].text[0], tags['TCON'].text[0], tags["USLT:desc:eng"].text
 
     def get_song_chunk(self, index, offset, test=False):
         filename, total_length = self.files[index], self.durations[index]
